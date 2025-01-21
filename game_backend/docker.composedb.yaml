@@ -1,0 +1,34 @@
+version: "3.0.1"
+
+services:
+  pymongo:
+    image: mongo:latest
+    container_name: pymongo_container
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: PyMongo
+      MONGO_INITDB_ROOT_PASSWORD: PyMongo123
+      MONGO_INITDB_DATABASE: game_db
+    ports:
+      - 27017:27017
+    volumes:
+      - ./docker/mongodb_data:/data/db
+      - ./docker/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+    restart: always
+    command: mongod --auth
+    networks:
+      - custom_network
+
+  redis:
+    image: redis:latest
+    container_name: redis_container
+    ports:
+      - 6379:6379
+    volumes:
+      - ./docker/redis_data:/data
+    restart: always
+    networks:
+      - custom_network
+
+networks:
+  custom_network:
+    driver: bridge
