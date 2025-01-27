@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  namespace: gamedb
+  name: mongo-volume
+spec:
+  capacity:
+    storage: 1.5Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /data/db/mongodb

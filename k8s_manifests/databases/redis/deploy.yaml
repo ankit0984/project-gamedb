@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: gamedb
+  name: redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:latest
+          ports:
+            - containerPort: 6379
+          env:
+            - name: REDIS_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: redis-svc
+                  key: username
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: redis-svc
+                  key: password
+          volumeMounts:
+            - name: redis-data
+              mountPath: /data/db/redis
+          command: ["redis-server"]
+          args: ["--save", "60", "1", "--loglevel", "warning"]
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "900Mi"
+      volumes:
+        - name: redis-data
+          emptyDir: {}
