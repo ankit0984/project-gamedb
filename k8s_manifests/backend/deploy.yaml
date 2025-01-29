@@ -1,0 +1,105 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: gamedb
+  name: api
+  labels:
+    role: api
+    env: gamedb
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 25%
+  selector:
+    matchLabels:
+      role: api
+  template:
+    metadata:
+      labels:
+        role: api
+    spec:
+      containers:
+        - name: api
+          image: 975049888157.dkr.ecr.eu-north-1.amazonaws.com/gamedb_backend
+          imagePullPolicy: Always
+          env:
+            - name: MONGO_URI
+              value: mongodb://mongo-svc:27017/gamedb?directConnection=true
+            - name: MONGO_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-svc
+                  key: username
+            - name: MONGO_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-svc
+                  key: password
+            - name: REDIS_URI
+              value: redis://gamedb:gamedb@226547@redis-service.gamedb.svc.cluster.local:6379
+            - name: NODE_ENV
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: node_env
+            - name: ACCESS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: access_token
+            - name: ACCESS_TOKEN_EXPIRY
+              value: 1d
+            - name: REFRESH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: refresh_token
+            - name: REFRESH_TOKEN_EXPIRY
+              value: 30d
+            - name: EMAIL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: email_user
+            - name: EMAIL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: email_password
+            - name: RATE_LIMIT_WINDOW_MS
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: rate_limit_window_ms
+            - name: RATE_LIMIT_MAX_REQUESTS
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: rate_limit_max_requests
+            - name: LOG_LEVEL
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: log_level
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          ports:
+            - containerPort: 3636
+          livenessProbe:
+            httpGet:
+              path: /ok
+              port: 3636
+            initialDelaySeconds: 2
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /ok
+              port: 3636
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            successThreshold: 1
