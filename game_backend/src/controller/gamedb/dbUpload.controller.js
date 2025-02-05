@@ -3,7 +3,6 @@ import { asyncHandler } from "../../utils/asyncHandler.js";
 import { ApiError } from "../../utils/ApiError.js";
 import { ApiResponse } from "../../utils/ApiResponse.js";
 import { Game } from "../../models/games.models.js";
-import { redisService } from "../../services/redis.service.js";
 
 export const gamedb = asyncHandler(async (req, res) => {
   // Extract data from request body

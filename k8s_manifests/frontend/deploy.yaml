@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: gamedb
+  labels:
+    role: frontend
+    env: gamedb-fr
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 25%
+  selector:
+    matchLabels:
+      role: frontend
+  template:
+    metadata:
+      labels:
+        role: frontend
+    spec:
+      containers:
+        - name: frontend-container
+          image: 975049888157.dkr.ecr.eu-north-1.amazonaws.com/gamedb_frontend
+          imagePullPolicy: Always
+          env:
+            - name: NEXT_PUBLIC_API_BASE_URL
+              value: "https//gamedb.devstech.xyz/api"
+          ports:
+            - containerPort: 3000
+          resources:
+            limits:
+              cpu: 100m
+              memory: 128Mi
+            requests:
+              cpu: 50m
+              memory: 64Mi
